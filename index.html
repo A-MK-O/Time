@@ -23,19 +23,27 @@
 <body>
     <div id="time">15:00</div>
     <script>
+        // CONFIGURABLE VALUES
         let startHour = 15;
         let endHour = 23;
-        let interval = 1000; // 1 second real = 1 in-game minute
+        let realDurationMinutes = 30; // total real-world minutes for full in-game span
+
+        // CALCULATED VALUES
         let totalGameMinutes = (endHour - startHour) * 60;
-        let sessionStart = Date.now();
+        let startTime = localStorage.getItem('clockStartTime');
+        if (!startTime) {
+            startTime = Date.now();
+            localStorage.setItem('clockStartTime', startTime);
+        } else {
+            startTime = parseInt(startTime);
+        }
 
         function updateTime() {
-            let elapsedRealSeconds = Math.floor((Date.now() - sessionStart) / 1000);
-            let elapsedGameMinutes = elapsedRealSeconds;
+            let elapsedRealMs = Date.now() - startTime;
+            let elapsedRealMinutes = elapsedRealMs / 1000 / 60;
 
-            if (elapsedGameMinutes > totalGameMinutes) {
-                elapsedGameMinutes = totalGameMinutes;
-            }
+            let progress = Math.min(elapsedRealMinutes / realDurationMinutes, 1);
+            let elapsedGameMinutes = Math.floor(progress * totalGameMinutes);
 
             let totalMinutes = startHour * 60 + elapsedGameMinutes;
             let hours = Math.floor(totalMinutes / 60);
@@ -44,7 +52,7 @@
             document.getElementById('time').innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         }
 
-        setInterval(updateTime, interval);
+        setInterval(updateTime, 1000); // check every second
         updateTime();
     </script>
 </body>
