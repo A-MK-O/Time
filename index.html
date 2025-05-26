@@ -25,21 +25,23 @@
     <script>
         let startHour = 15;
         let endHour = 23;
-        let totalSteps = 30; // total real minutes to reach 23:00
-        let currentStep = 0;
-        let interval = 60000; // 1 minute in real time
-        
+        let interval = 1000; // 1 second real = 1 in-game minute
+        let totalGameMinutes = (endHour - startHour) * 60;
+        let sessionStart = Date.now();
+
         function updateTime() {
-            let progress = currentStep / totalSteps;
-            let totalMinutes = startHour * 60 + Math.round((endHour - startHour) * 60 * progress);
+            let elapsedRealSeconds = Math.floor((Date.now() - sessionStart) / 1000);
+            let elapsedGameMinutes = elapsedRealSeconds;
+
+            if (elapsedGameMinutes > totalGameMinutes) {
+                elapsedGameMinutes = totalGameMinutes;
+            }
+
+            let totalMinutes = startHour * 60 + elapsedGameMinutes;
             let hours = Math.floor(totalMinutes / 60);
             let minutes = totalMinutes % 60;
 
             document.getElementById('time').innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            
-            if (currentStep < totalSteps) {
-                currentStep++;
-            }
         }
 
         setInterval(updateTime, interval);
