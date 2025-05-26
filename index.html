@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time</title>
+    <title>In-Game Time Clock</title>
     <style>
         body {
             background-color: #0f0f0f;
@@ -21,12 +21,12 @@
     </style>
 </head>
 <body>
-    <div id="time">15:00</div>
+    <div id="time">00:00</div>
     <script>
         // CONFIGURABLE VALUES
-        let startHour = 15;
-        let endHour = 23;
-        let realDurationMinutes = 30; // total real-world minutes for full in-game span
+        let startHour = 0;
+        let endHour = 24;
+        let realDurationMinutes = 60; // 1 real hour for a full 24h in-game cycle
 
         // CALCULATED VALUES
         let totalGameMinutes = (endHour - startHour) * 60;
@@ -46,7 +46,7 @@
             let elapsedGameMinutes = Math.floor(progress * totalGameMinutes);
 
             let totalMinutes = startHour * 60 + elapsedGameMinutes;
-            let hours = Math.floor(totalMinutes / 60);
+            let hours = Math.floor(totalMinutes / 60) % 24;
             let minutes = totalMinutes % 60;
 
             document.getElementById('time').innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
