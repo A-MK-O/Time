@@ -15,74 +15,35 @@
             justify-content: center;
             height: 100vh;
         }
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 0.5em;
-        }
         #time {
-            font-size: 3em;
-            margin: 1em;
-        }
-        button {
-            margin: 0.5em;
-            padding: 0.5em 1em;
-            font-size: 1em;
-            cursor: pointer;
-            background: #1f1f1f;
-            color: #00ffcc;
-            border: 1px solid #00ffcc;
+            font-size: 6em;
         }
     </style>
 </head>
 <body>
-    <h1>In-Game Time Clock</h1>
     <div id="time">15:00</div>
-    <div>
-        <button onclick="startClock()">Start</button>
-        <button onclick="pauseClock()">Pause</button>
-        <button onclick="resetClock()">Reset</button>
-    </div>
     <script>
-        let inGameMinutes = 0;
-        let interval = null;
         let startHour = 15;
         let endHour = 23;
-        let stepMinutes = 30; // how much in-game time passes per tick
-        let realInterval = 1000; // real milliseconds per tick
-
+        let totalSteps = 30; // total real minutes to reach 23:00
+        let currentStep = 0;
+        let interval = 60000; // 1 minute in real time
+        
         function updateTime() {
-            let totalMinutes = startHour * 60 + inGameMinutes;
+            let progress = currentStep / totalSteps;
+            let totalMinutes = startHour * 60 + Math.round((endHour - startHour) * 60 * progress);
             let hours = Math.floor(totalMinutes / 60);
             let minutes = totalMinutes % 60;
 
-            if (hours >= endHour) {
-                pauseClock();
-                document.getElementById('time').innerText = "END";
-                return;
-            }
-
             document.getElementById('time').innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            inGameMinutes += stepMinutes;
-        }
-
-        function startClock() {
-            if (!interval) {
-                interval = setInterval(updateTime, realInterval);
+            
+            if (currentStep < totalSteps) {
+                currentStep++;
             }
         }
 
-        function pauseClock() {
-            clearInterval(interval);
-            interval = null;
-        }
-
-        function resetClock() {
-            pauseClock();
-            inGameMinutes = 0;
-            document.getElementById('time').innerText = `${startHour.toString().padStart(2, '0')}:00`;
-        }
-
-        resetClock();
+        setInterval(updateTime, interval);
+        updateTime();
     </script>
 </body>
 </html>
