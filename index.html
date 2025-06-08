@@ -23,31 +23,26 @@
 <body>
   <div id="time">00:00</div>
   <script>
-    // === CONFIGURABLE INPUTS ===
-    const startHour = 7; // In-game start time (e.g. 7 for 07:00)
-    const endHour = 0;   // In-game end time (0 or 24 for midnight)
-    const realDurationMinutes = 60; // Real-time duration for full cycle
+    // === CONFIGURATION ===
+    const startHour = 7;          // In-game start time
+    const endHour = 0;            // In-game end time (0 = midnight)
+    const realDurationMinutes = 60; // Real-world duration in minutes
 
     // === CALCULATIONS ===
-    // Normalize endHour if it's 0 (for midnight)
     const adjustedEndHour = endHour === 0 ? 24 : endHour;
-
-    // In-game minutes total (e.g., from 07:00 to 00:00 = 1020 minutes)
     const inGameDayMinutes = ((adjustedEndHour - startHour + 24) % 24) * 60;
-
-    // In-game minutes progressed per 1 real minute
     const inGamePerRealMinute = inGameDayMinutes / realDurationMinutes;
 
     function updateTime() {
       const now = new Date();
 
-      // Get total real minutes since midnight
-      const realMinutesToday = now.getHours() * 60 + now.getMinutes();
+      // Get total real-world minutes since fixed reference: today’s midnight
+      const midnight = new Date(now);
+      midnight.setHours(0, 0, 0, 0);
+      const realElapsedMinutes = Math.floor((now - midnight) / 60000);
 
-      // Loop through the realDurationMinutes
-      const minuteInCycle = realMinutesToday % realDurationMinutes;
-
-      // Calculate in-game elapsed time
+      // Map to cycle
+      const minuteInCycle = realElapsedMinutes % realDurationMinutes;
       const inGameElapsed = Math.floor(minuteInCycle * inGamePerRealMinute);
       const totalGameMinutes = (startHour * 60 + inGameElapsed) % (24 * 60);
 
@@ -58,7 +53,6 @@
         `${gameHour.toString().padStart(2, '0')}:${gameMinute.toString().padStart(2, '0')}`;
     }
 
-    // Align to start of real minute
     function startClock() {
       updateTime();
       const now = new Date();
