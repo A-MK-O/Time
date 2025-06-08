@@ -24,35 +24,38 @@
   <div id="time">00:00</div>
   <script>
     const startHour = 7; // 07:00
-    const inGameDayMinutes = 17 * 60; // 1020 minutes (07:00 to 00:00)
-    const realCycleMinutes = 60; // 1 hour real time
+    const inGameDayMinutes = (24 - 7) * 60; // 07:00 to 00:00 = 1020 minutes
+    const realCycleMinutes = 60; // 1 hour = full in-game day
     const inGamePerRealMinute = inGameDayMinutes / realCycleMinutes; // 17 minutes
 
     function updateTime() {
       const now = new Date();
 
-      // Get the real minute in the current hour
-      const realMinute = now.getMinutes(); // 0–59
+      // Get minutes since real-world midnight
+      const realMinutesToday = now.getHours() * 60 + now.getMinutes();
 
-      // Calculate in-game time
-      const inGameElapsed = Math.floor(realMinute * inGamePerRealMinute);
+      // Get position in the 60-minute cycle
+      const minuteInCycle = realMinutesToday % realCycleMinutes;
+
+      // Convert to in-game time
+      const inGameElapsed = Math.floor(minuteInCycle * inGamePerRealMinute);
       const totalGameMinutes = startHour * 60 + inGameElapsed;
 
-      const hours = Math.floor(totalGameMinutes / 60) % 24;
-      const minutes = totalGameMinutes % 60;
+      const gameHour = Math.floor(totalGameMinutes / 60) % 24;
+      const gameMinute = totalGameMinutes % 60;
 
       document.getElementById('time').innerText =
-        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        `${gameHour.toString().padStart(2, '0')}:${gameMinute.toString().padStart(2, '0')}`;
     }
 
-    // Update once per real minute, aligned to the start of each minute
+    // Sync to the start of the next real minute
     function startClock() {
       updateTime();
       const now = new Date();
-      const delay = (60 - now.getSeconds()) * 1000 + 50; // sync to next full minute
+      const delay = (60 - now.getSeconds()) * 1000 + 50;
       setTimeout(() => {
         updateTime();
-        setInterval(updateTime, 60000); // update every 1 minute
+        setInterval(updateTime, 60000);
       }, delay);
     }
 
