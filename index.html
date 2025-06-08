@@ -24,35 +24,34 @@
     <div id="time">00:00</div>
     <script>
         // CONFIGURABLE VALUES
-        let startHour = 15;
-        let endHour = 24;
-        let realDurationMinutes = 60; // 1 real hour for a full 24h in-game cycle
+        let inGameStartHour = 7; // 07:00
+        let inGameEndHour = 24; // 00:00 (midnight)
+        let realDurationMinutes = 60; // full in-game day length in real minutes
 
-        // CALCULATED VALUES
-        let totalGameMinutes = (endHour - startHour) * 60;
-        let startTime = localStorage.getItem('clockStartTime');
-        if (!startTime) {
-            startTime = Date.now();
-            localStorage.setItem('clockStartTime', startTime);
-        } else {
-            startTime = parseInt(startTime);
-        }
+        // Derived total in-game minutes
+        let totalGameMinutes = (inGameEndHour - inGameStartHour) * 60;
 
         function updateTime() {
-            let elapsedRealMs = Date.now() - startTime;
-            let elapsedRealMinutes = elapsedRealMs / 1000 / 60;
+            // Get current time in minutes since last real midnight
+            let now = new Date();
+            let realMinutesToday = now.getHours() * 60 + now.getMinutes();
+            
+            // Map real time to a 60-minute cycle (looping)
+            let minutesIntoCycle = realMinutesToday % realDurationMinutes;
 
-            let progress = Math.min(elapsedRealMinutes / realDurationMinutes, 1);
+            // Compute game time progression
+            let progress = minutesIntoCycle / realDurationMinutes;
             let elapsedGameMinutes = Math.floor(progress * totalGameMinutes);
 
-            let totalMinutes = startHour * 60 + elapsedGameMinutes;
-            let hours = Math.floor(totalMinutes / 60) % 24;
-            let minutes = totalMinutes % 60;
+            let totalMinutes = inGameStartHour * 60 + elapsedGameMinutes;
+            let gameHours = Math.floor(totalMinutes / 60) % 24;
+            let gameMinutes = totalMinutes % 60;
 
-            document.getElementById('time').innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            document.getElementById('time').innerText =
+                `${gameHours.toString().padStart(2, '0')}:${gameMinutes.toString().padStart(2, '0')}`;
         }
 
-        setInterval(updateTime, 1000); // check every second
+        setInterval(updateTime, 1000);
         updateTime();
     </script>
 </body>
