@@ -23,29 +23,33 @@
 <body>
     <div id="time">00:00</div>
     <script>
-        const gameStartHour = 7; // 07:00
-        const gameDayLengthMinutes = (24 - 7); // 17 hours => 1020 minutes
+        // CONFIGURATION
+        const startHour = 7; // in-game day starts at 07:00
+        const inGameMinutesPerDay = (24 - 7) * 60; // 17 in-game hours = 1020 minutes
+        const realDurationMinutes = 60; // full in-game day = 60 real minutes
 
         function updateTime() {
             const now = new Date();
+            
+            // Get current real minutes into the current hour
+            const realMinutesToday = now.getHours() * 60 + now.getMinutes();
+            const minutesIntoCycle = realMinutesToday % realDurationMinutes;
 
-            // Get total minutes since some fixed reference point (e.g., midnight Jan 1, 1970)
-            const realMinutes = Math.floor(now.getTime() / 1000 / 60);
+            // Convert real minutes to in-game minutes (scale: 1 real min = 17 in-game min)
+            const progress = minutesIntoCycle / realDurationMinutes;
+            const inGameElapsedMinutes = Math.floor(progress * inGameMinutesPerDay);
 
-            // Loop through 1020 real-world minutes
-            const minutesIntoGameDay = realMinutes % (gameDayLengthMinutes * 60);
-
-            // Add to 07:00 in-game start
-            const totalGameMinutes = gameStartHour * 60 + minutesIntoGameDay;
-            const gameHours = Math.floor(totalGameMinutes / 60) % 24;
-            const gameMinutes = totalGameMinutes % 60;
+            // Add to 07:00 start
+            const totalInGameMinutes = startHour * 60 + inGameElapsedMinutes;
+            const gameHour = Math.floor(totalInGameMinutes / 60) % 24;
+            const gameMinute = totalInGameMinutes % 60;
 
             document.getElementById('time').innerText = 
-                `${gameHours.toString().padStart(2, '0')}:${gameMinutes.toString().padStart(2, '0')}`;
+                `${gameHour.toString().padStart(2, '0')}:${gameMinute.toString().padStart(2, '0')}`;
         }
 
-        setInterval(updateTime, 1000);
-        updateTime();
+        setInterval(updateTime, 1000); // updates every second
+        updateTime(); // initial call
     </script>
 </body>
 </html>
