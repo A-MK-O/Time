@@ -23,31 +23,24 @@
 <body>
     <div id="time">00:00</div>
     <script>
-        // CONFIGURABLE VALUES
-        let inGameStartHour = 7; // 07:00
-        let inGameEndHour = 24; // 00:00 (midnight)
-        let realDurationMinutes = 60; // full in-game day length in real minutes
-
-        // Derived total in-game minutes
-        let totalGameMinutes = (inGameEndHour - inGameStartHour) * 60;
+        const gameStartHour = 7; // 07:00
+        const gameDayLengthMinutes = (24 - 7); // 17 hours => 1020 minutes
 
         function updateTime() {
-            // Get current time in minutes since last real midnight
-            let now = new Date();
-            let realMinutesToday = now.getHours() * 60 + now.getMinutes();
-            
-            // Map real time to a 60-minute cycle (looping)
-            let minutesIntoCycle = realMinutesToday % realDurationMinutes;
+            const now = new Date();
 
-            // Compute game time progression
-            let progress = minutesIntoCycle / realDurationMinutes;
-            let elapsedGameMinutes = Math.floor(progress * totalGameMinutes);
+            // Get total minutes since some fixed reference point (e.g., midnight Jan 1, 1970)
+            const realMinutes = Math.floor(now.getTime() / 1000 / 60);
 
-            let totalMinutes = inGameStartHour * 60 + elapsedGameMinutes;
-            let gameHours = Math.floor(totalMinutes / 60) % 24;
-            let gameMinutes = totalMinutes % 60;
+            // Loop through 1020 real-world minutes
+            const minutesIntoGameDay = realMinutes % (gameDayLengthMinutes * 60);
 
-            document.getElementById('time').innerText =
+            // Add to 07:00 in-game start
+            const totalGameMinutes = gameStartHour * 60 + minutesIntoGameDay;
+            const gameHours = Math.floor(totalGameMinutes / 60) % 24;
+            const gameMinutes = totalGameMinutes % 60;
+
+            document.getElementById('time').innerText = 
                 `${gameHours.toString().padStart(2, '0')}:${gameMinutes.toString().padStart(2, '0')}`;
         }
 
