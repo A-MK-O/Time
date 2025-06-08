@@ -1,57 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>In-Game Time Clock</title>
-    <style>
-        body {
-            background-color: #0f0f0f;
-            color: #00ffcc;
-            font-family: monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        #time {
-            font-size: 6em;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>In-Game Time Clock</title>
+  <style>
+    body {
+      background-color: #0f0f0f;
+      color: #00ffcc;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #time {
+      font-size: 6em;
+    }
+  </style>
 </head>
 <body>
-    <div id="time">00:00</div>
-    <script>
-        // CONFIGURATION
-        const startHour = 7; // in-game day starts at 07:00
-        const inGameMinutesPerDay = (24 - 7) * 60; // 1020 minutes (07:00 to 00:00)
-        const realDurationMinutes = 60; // how long the full in-game day lasts in real time
+  <div id="time">00:00</div>
+  <script>
+    const startHour = 7; // 07:00
+    const inGameDayMinutes = 17 * 60; // 1020 minutes (07:00 to 00:00)
+    const realCycleMinutes = 60; // 1 hour real time
+    const inGamePerRealMinute = inGameDayMinutes / realCycleMinutes; // 17 minutes
 
-        function updateTime() {
-            const now = new Date();
+    function updateTime() {
+      const now = new Date();
 
-            // Total real minutes since Unix epoch
-            const realMinutesSinceEpoch = Math.floor(now.getTime() / 1000 / 60);
+      // Get the real minute in the current hour
+      const realMinute = now.getMinutes(); // 0–59
 
-            // How many minutes have passed in the current 60-min real cycle
-            const minutesIntoCycle = realMinutesSinceEpoch % realDurationMinutes;
+      // Calculate in-game time
+      const inGameElapsed = Math.floor(realMinute * inGamePerRealMinute);
+      const totalGameMinutes = startHour * 60 + inGameElapsed;
 
-            // Scale to in-game time
-            const progress = minutesIntoCycle / realDurationMinutes;
-            const inGameElapsedMinutes = Math.floor(progress * inGameMinutesPerDay);
+      const hours = Math.floor(totalGameMinutes / 60) % 24;
+      const minutes = totalGameMinutes % 60;
 
-            // Add to 07:00
-            const totalInGameMinutes = startHour * 60 + inGameElapsedMinutes;
-            const gameHour = Math.floor(totalInGameMinutes / 60) % 24;
-            const gameMinute = totalInGameMinutes % 60;
+      document.getElementById('time').innerText =
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
 
-            document.getElementById('time').innerText =
-                `${gameHour.toString().padStart(2, '0')}:${gameMinute.toString().padStart(2, '0')}`;
-        }
-
-        setInterval(updateTime, 1000);
+    // Update once per real minute, aligned to the start of each minute
+    function startClock() {
+      updateTime();
+      const now = new Date();
+      const delay = (60 - now.getSeconds()) * 1000 + 50; // sync to next full minute
+      setTimeout(() => {
         updateTime();
-    </script>
+        setInterval(updateTime, 60000); // update every 1 minute
+      }, delay);
+    }
+
+    startClock();
+  </script>
 </body>
 </html>
