@@ -23,32 +23,42 @@
 <body>
   <div id="time">00:00</div>
   <script>
-    const startHour = 7; // 07:00
-    const inGameDayMinutes = (24 - 7) * 60; // 07:00 to 00:00 = 1020 minutes
-    const realCycleMinutes = 60; // 1 hour = full in-game day
-    const inGamePerRealMinute = inGameDayMinutes / realCycleMinutes; // 17 minutes
+    // === CONFIGURABLE INPUTS ===
+    const startHour = 7; // In-game start time (e.g. 7 for 07:00)
+    const endHour = 0;   // In-game end time (0 or 24 for midnight)
+    const realDurationMinutes = 60; // Real-time duration for full cycle
+
+    // === CALCULATIONS ===
+    // Normalize endHour if it's 0 (for midnight)
+    const adjustedEndHour = endHour === 0 ? 24 : endHour;
+
+    // In-game minutes total (e.g., from 07:00 to 00:00 = 1020 minutes)
+    const inGameDayMinutes = ((adjustedEndHour - startHour + 24) % 24) * 60;
+
+    // In-game minutes progressed per 1 real minute
+    const inGamePerRealMinute = inGameDayMinutes / realDurationMinutes;
 
     function updateTime() {
       const now = new Date();
 
-      // Get minutes since real-world midnight
+      // Get total real minutes since midnight
       const realMinutesToday = now.getHours() * 60 + now.getMinutes();
 
-      // Get position in the 60-minute cycle
-      const minuteInCycle = realMinutesToday % realCycleMinutes;
+      // Loop through the realDurationMinutes
+      const minuteInCycle = realMinutesToday % realDurationMinutes;
 
-      // Convert to in-game time
+      // Calculate in-game elapsed time
       const inGameElapsed = Math.floor(minuteInCycle * inGamePerRealMinute);
-      const totalGameMinutes = startHour * 60 + inGameElapsed;
+      const totalGameMinutes = (startHour * 60 + inGameElapsed) % (24 * 60);
 
-      const gameHour = Math.floor(totalGameMinutes / 60) % 24;
+      const gameHour = Math.floor(totalGameMinutes / 60);
       const gameMinute = totalGameMinutes % 60;
 
       document.getElementById('time').innerText =
         `${gameHour.toString().padStart(2, '0')}:${gameMinute.toString().padStart(2, '0')}`;
     }
 
-    // Sync to the start of the next real minute
+    // Align to start of real minute
     function startClock() {
       updateTime();
       const now = new Date();
