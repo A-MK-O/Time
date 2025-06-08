@@ -25,31 +25,33 @@
     <script>
         // CONFIGURATION
         const startHour = 7; // in-game day starts at 07:00
-        const inGameMinutesPerDay = (24 - 7) * 60; // 17 in-game hours = 1020 minutes
-        const realDurationMinutes = 60; // full in-game day = 60 real minutes
+        const inGameMinutesPerDay = (24 - 7) * 60; // 1020 minutes (07:00 to 00:00)
+        const realDurationMinutes = 60; // how long the full in-game day lasts in real time
 
         function updateTime() {
             const now = new Date();
-            
-            // Get current real minutes into the current hour
-            const realMinutesToday = now.getHours() * 60 + now.getMinutes();
-            const minutesIntoCycle = realMinutesToday % realDurationMinutes;
 
-            // Convert real minutes to in-game minutes (scale: 1 real min = 17 in-game min)
+            // Total real minutes since Unix epoch
+            const realMinutesSinceEpoch = Math.floor(now.getTime() / 1000 / 60);
+
+            // How many minutes have passed in the current 60-min real cycle
+            const minutesIntoCycle = realMinutesSinceEpoch % realDurationMinutes;
+
+            // Scale to in-game time
             const progress = minutesIntoCycle / realDurationMinutes;
             const inGameElapsedMinutes = Math.floor(progress * inGameMinutesPerDay);
 
-            // Add to 07:00 start
+            // Add to 07:00
             const totalInGameMinutes = startHour * 60 + inGameElapsedMinutes;
             const gameHour = Math.floor(totalInGameMinutes / 60) % 24;
             const gameMinute = totalInGameMinutes % 60;
 
-            document.getElementById('time').innerText = 
+            document.getElementById('time').innerText =
                 `${gameHour.toString().padStart(2, '0')}:${gameMinute.toString().padStart(2, '0')}`;
         }
 
-        setInterval(updateTime, 1000); // updates every second
-        updateTime(); // initial call
+        setInterval(updateTime, 1000);
+        updateTime();
     </script>
 </body>
 </html>
